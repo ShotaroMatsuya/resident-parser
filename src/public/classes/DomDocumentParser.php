@@ -47,15 +47,20 @@ class DomDocumentParser
 		$hospitalName = $this->getHospitalName();
 		$rateArray = array();
 
-		for ($i = 1; $i < 8; $i++) {
+		for ($i = 0; $i < 14; $i++) {
 
-			if ($i === 1) {
+			if ($i === 0) {
 				$rateArray['総合点'] = (int)$this->getTotalScore();
 				continue;
 			}
-
-			$key = $this->getTitle($i);
-			$value = $this->outputRateNum($i);
+			if ($i < 7) {
+				$key = $this->getColumnTitle($i);
+				$value = $this->outputRateNum($i + 1);
+			}
+			if ($i >= 7 && $i < 14) {
+				$key = $this->getColumnTitle($i);
+				$value = $this->getColumnValue($i - 7);
+			}
 			$rateArray[$key] = $value;
 		}
 		$this->results[$hospitalName] = $rateArray;
@@ -85,9 +90,19 @@ class DomDocumentParser
 	 * @param int $i
 	 * @return string
 	 */
-	private function getTitle($i)
+	private function getColumnTitle($i)
 	{
-		return $this->xpath->query("//div[@class='table__row'][$i]/p")->item(0)->nodeValue;
+		return $this->xpath->query("//p[@class='table__row__title']")->item($i)->nodeValue;
+	}
+	/**
+	 * 値の取得
+	 * 
+	 * @param int $i
+	 * @return string
+	 */
+	private function getColumnValue($i)
+	{
+		return $this->xpath->query("//p[@class='table__row__text']")->item($i)->nodeValue;
 	}
 
 	/**
@@ -105,6 +120,6 @@ class DomDocumentParser
 	 */
 	private function getHospitalName()
 	{
-		return $this->xpath->query("//h1[@class='hospital-top__container__title']")->item(0)->nodeValue;
+		return $this->xpath->query("//h1[@class='hospital-top__container__title'][1]")->item(0)->nodeValue;
 	}
 }
